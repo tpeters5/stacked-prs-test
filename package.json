@@ -1,0 +1,10 @@
+{
+  "name": "stacked-prs-test",
+  "version": "1.0.0",
+  "description": "Testing stacked PRs workflow",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "test": "node src/tests/auth.test.js"
+  }
+}
