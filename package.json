@@ -1,0 +1,56 @@
+const { authenticate, createUser } = require('./auth');
+
+const app = {
+  login: (email, password) => {
+    const result = authenticate(email, password);
+    console.log(result.success ? `Welcome, ${result.user.name}!` : `Login failed: ${result.error}`);
+    return result;
+  },
+  register: (name, email, password) => {
+    const user = createUser(name, email, password);
+    console.log(`Registered: ${user.name} (${user.email})`);
+    return user;
+  }
+};
+
+module.exports = app;
+EOF
+
+cat > src/auth.js << 'EOF'
+const users = [];
+
+function createUser(name, email, password) {
+  const user = { id: Date.now(), name, email, password, createdAt: new Date() };
+  users.push(user);
+  return { id: user.id, name: user.name, email: user.email };
+}
+
+function authenticate(email, password) {
+  const user = users.find(u => u.email === email && u.password === password);
+  if (!user) return { success: false, error: 'Invalid credentials' };
+  return { success: true, user: { id: user.id, name: user.name, email: user.email } };
+}
+
+module.exports = { createUser, authenticate, getUsers: () => users };
+
+
+const { createUser, authenticate } = require('../auth');
+
+function assert(condition, msg) {
+  if (!condition) throw new Error(`FAIL: ${msg}`);
+  console.log(`PASS: ${msg}`);
+}
+
+// Test user creation
+const user = createUser('Tobe', 'tobe@test.com', 'password123');
+assert(user.name === 'Tobe', 'createUser returns name');
+assert(user.email === 'tobe@test.com', 'createUser returns email');
+
+// Test authentication
+const authResult = authenticate('tobe@test.com', 'password123');
+assert(authResult.success === true, 'authenticate succeeds with correct creds');
+
+const failResult = authenticate('tobe@test.com', 'wrong');
+assert(failResult.success === false, 'authenticate fails with wrong password');
+
+console.log('\nAll tests passed ✓');
